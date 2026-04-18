@@ -1,0 +1,760 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schedule System</title>
+
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  /* =========================
+   ROOT VARIABLES
+========================= */
+:root{
+  --header-height:80px;
+  --nav-height:60px;
+}
+
+/* =========================
+   GLOBAL
+========================= */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0b3d91,#1e90ff);
+  color:white;
+}
+
+/* =========================
+   HEADER
+========================= */
+header{
+  position:fixed;
+  top:0;
+  width:100%;
+  height:var(--header-height);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:#0b3d91;
+  z-index:1000;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+nav{
+  position:fixed;
+  top:var(--header-height);
+  width:100%;
+  height:var(--nav-height);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:20px;
+  background:linear-gradient(90deg,#0b3d91,#1e90ff,#0b3d91);
+  z-index:999;
+}
+
+nav a{
+  color:white;
+  text-decoration:none;
+  padding:6px 12px;
+  border-radius:6px;
+  transition:0.2s;
+}
+
+nav a:hover{
+  background:rgba(255,255,255,0.2);
+  color:yellow;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+.container{
+  padding-top:calc(var(--header-height) + var(--nav-height) + 20px);
+  padding-left:20px;
+  padding-right:20px;
+}
+
+/* =========================
+   CARD (GLASS)
+========================= */
+.card{
+  background:rgba(255,255,255,0.1);
+  backdrop-filter:blur(12px);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:20px;
+  border:1px solid rgba(255,255,255,0.2);
+  animation:fadeUp 0.5s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* =========================
+   SELECT HIGHLIGHT
+========================= */
+.selectable{
+  cursor:pointer;
+}
+
+.selectable.selected{
+  outline:3px solid yellow;
+  transform:scale(1.03);
+}
+
+/* =========================
+   MAIN BOX
+========================= */
+.main-box{
+  height:260px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.2);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+/* =========================
+   CLASS GRID
+========================= */
+.class-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:10px;
+}
+
+.class-box{
+  height:90px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:0.2s;
+}
+
+.class-box:hover{
+  background:rgba(255,255,255,0.3);
+}
+
+/* =========================
+   CALENDAR
+========================= */
+.month-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.month{
+  aspect-ratio:1/1;
+  border-radius:10px;
+  background:rgba(255,255,255,0.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:0.2s;
+}
+
+.month:hover{
+  background:rgba(255,255,255,0.3);
+}
+
+/* =========================
+   RESULT SECTION
+========================= */
+.class-result{
+  margin-bottom:20px;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.1);
+}
+
+.term-title{
+  margin:8px 0 4px;
+  font-size:14px;
+  font-weight:600;
+  color:#fff;
+}
+
+/* SCROLL ROW */
+.scroll-row{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding-bottom:5px;
+}
+
+.scroll-row::-webkit-scrollbar{
+  height:6px;
+}
+.scroll-row::-webkit-scrollbar-thumb{
+  background:#ffffff50;
+  border-radius:5px;
+}
+
+/* IMAGES */
+.scroll-row img{
+  width:120px;
+  height:90px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.scroll-row img:hover{
+  transform:scale(1.05);
+}
+
+/* DELETE ICON */
+.delete-icon{
+  position:absolute;
+  top:2px;
+  right:4px;
+  background:red;
+  color:white;
+  padding:2px 6px;
+  border-radius:4px;
+  font-size:12px;
+  cursor:pointer;
+}
+
+/* =========================
+   VIEWER (FULLSCREEN)
+========================= */
+#viewer{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  display:none;
+  background:rgba(0,0,0,0.95);
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+}
+
+#viewer img{
+  max-width:95%;
+  max-height:95%;
+  border-radius:10px;
+}
+
+/* =========================
+   FLOATING BUTTONS (FAB)
+========================= */
+.fab-container{
+  position:fixed;
+  bottom:25px;
+  right:25px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  z-index:2000;
+}
+
+.fab{
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  border:none;
+  color:white;
+  font-size:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+
+  backdrop-filter:blur(10px);
+  background:rgba(255,255,255,0.15);
+
+  box-shadow:0 8px 20px rgba(0,0,0,0.3);
+  transition:0.3s;
+}
+
+.fab.upload{
+  background:linear-gradient(135deg,#28a745,#00ff95);
+}
+
+.fab.delete{
+  background:linear-gradient(135deg,#dc3545,#ff4d6d);
+}
+
+.fab:hover{
+  transform:translateY(-5px) scale(1.1);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media(max-width:600px){
+
+  .main-box{
+    height:200px;
+  }
+
+  .scroll-row img{
+    width:100px;
+    height:75px;
+  }
+
+}
+/* CLASS HEADER */
+.class-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+  padding:8px;
+  border-radius:8px;
+  background:rgba(255,255,255,0.15);
+  margin-bottom:8px;
+}
+
+/* COLLAPSIBLE BODY */
+.class-body{
+  padding:5px;
+}
+
+/* TERMINAL COLORS */
+.term-title{
+  margin:10px 0 5px;
+  font-weight:600;
+  padding-left:6px;
+  border-left:4px solid white;
+}
+
+.term-title.t1{border-color:#00bfff;}
+.term-title.t2{border-color:#00ff95;}
+.term-title.t3{border-color:#ff4d6d;}
+
+/* SCROLL ROW PREMIUM */
+.scroll-row{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding-bottom:8px;
+  scroll-snap-type:x mandatory;
+}
+
+.scroll-row img{
+  scroll-snap-align:start;
+}
+
+/* IMAGE WRAP */
+.img-wrap{
+  position:relative;
+}
+
+/* EMPTY STATE */
+.empty{
+  opacity:0.6;
+  font-size:13px;
+  padding:10px;
+}
+
+/* HOVER EFFECT */
+.img-wrap img:hover{
+  transform:scale(1.08);
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+  <h1>Shree Limpatar Mavi</h1>
+  <p>📅 Schedule System</p>
+</header>
+
+<nav>
+  <a href="#classes">Class</a>
+  <a href="#exam">Exam</a>
+  <a href="#result">Result</a>
+  <a href="#calendar">Calendar</a>
+</nav>
+
+<div class="container">
+
+<div class="card">
+  <h2>Main Schedule</h2>
+  <div class="main-box selectable" id="mainSchedule" onclick="selectBox('mainSchedule')"></div>
+</div>
+
+<div class="card" id="classes">
+  <h2>Class Routine</h2>
+  <div class="class-grid" id="classesGrid"></div>
+</div>
+
+<div class="card" id="exam">
+  <h2>Exam Schedule</h2>
+  <div class="main-box selectable" id="examSchedule" onclick="selectBox('examSchedule')"></div>
+</div>
+
+<div class="card" id="result">
+  <h2>Exam Result</h2>
+  <div id="resultContainer"></div>
+</div>
+
+<div class="card" id="calendar">
+  <h2>Calendar</h2>
+  <div class="month-grid" id="months"></div>
+</div>
+
+</div>
+
+<!-- FLOATING BUTTONS -->
+<div class="fab-container">
+  <button class="fab upload" onclick="upload()" title="Upload"><i class="fas fa-upload"></i></button>
+  <button class="fab delete" onclick="deleteImage()" title="Delete"><i class="fas fa-trash"></i></button>
+</div>
+
+<div id="viewer"></div>
+<input type="file" id="fileInput" hidden>
+
+<script>
+function compressImage(base64, callback){
+  const img = new Image();
+  img.src = base64;
+
+  img.onload = ()=>{
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const scale = 0.5; // reduce size
+    canvas.width = img.width * scale;
+    canvas.height = img.height * scale;
+
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    callback(canvas.toDataURL("image/jpeg", 0.6));
+  };
+}
+/* =========================
+   🔐 PASSWORD SYSTEM
+========================= */
+const PASS = "Manish.13";
+
+/* =========================
+   🎯 GLOBAL STATE
+========================= */
+let selected = null;
+
+/* =========================
+   💾 STORAGE SYSTEM
+========================= */
+let data = JSON.parse(localStorage.getItem("data")) || {};
+let resultData = JSON.parse(localStorage.getItem("resultData")) || {};
+
+/* =========================
+   🎯 SELECT SYSTEM
+========================= */
+function selectBox(id){
+  selected = id;
+
+  document.querySelectorAll(".selectable").forEach(el=>{
+    el.classList.remove("selected");
+  });
+
+  document.getElementById(id)?.classList.add("selected");
+}
+
+function selectResult(id){
+  selected = id;
+
+  document.querySelectorAll(".selectable").forEach(el=>{
+    el.classList.remove("selected");
+  });
+
+  document.getElementById(id)?.classList.add("selected");
+}
+
+/* =========================
+   📤 UPLOAD SYSTEM (SMART)
+========================= */
+function upload(){
+
+  if(!selected){
+    alert("⚠️ Select a box first");
+    return;
+  }
+
+  if(prompt("Enter Password") !== PASS){
+    alert("❌ Wrong Password");
+    return;
+  }
+
+  /* RESULT AREA (MULTI IMAGE) */
+  if(selected.includes("-t")){
+    uploadResultImages();
+    return;
+  }
+
+  /* NORMAL IMAGE */
+  fileInput.onchange = e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = ()=>{
+      data[selected] = reader.result;
+      saveData();
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  fileInput.click();
+}
+
+/* =========================
+   📤 RESULT MULTI UPLOAD
+========================= */
+function uploadResultImages(){
+
+  fileInput.onchange = e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = ()=>{
+      if(!resultData[selected]){
+        resultData[selected] = [];
+      }
+
+      resultData[selected].push(reader.result);
+      saveResultData();
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  fileInput.click();
+}
+
+/* =========================
+   🗑 DELETE SYSTEM
+========================= */
+function deleteImage(){
+
+  if(!selected){
+    alert("⚠️ Select a box first");
+    return;
+  }
+
+  if(prompt("Enter Password") !== PASS){
+    alert("❌ Wrong Password");
+    return;
+  }
+
+  /* RESULT FULL DELETE */
+  if(selected.includes("-t")){
+    if(!confirm("Delete ALL photos in this terminal?")) return;
+
+    delete resultData[selected];
+    saveResultData();
+    return;
+  }
+
+  /* NORMAL DELETE */
+  if(!confirm("Delete this image?")) return;
+
+  delete data[selected];
+  saveData();
+}
+
+/* =========================
+   ❌ DELETE SINGLE IMAGE
+========================= */
+function removePhoto(key,index){
+
+  if(prompt("Enter Password") !== PASS){
+    alert("❌ Wrong Password");
+    return;
+  }
+
+  if(!confirm("Delete this photo?")) return;
+
+  resultData[key].splice(index,1);
+
+  saveResultData();
+}
+
+/* =========================
+   🖼 LOAD NORMAL DATA
+========================= */
+function loadAll(){
+
+  Object.keys(data).forEach(key=>{
+    const el = document.getElementById(key);
+    if(!el) return;
+
+    el.innerHTML = `
+      <img src="${data[key]}"
+      style="width:100%;height:100%;object-fit:cover"
+      onclick="event.stopPropagation();viewImage(this.src)">
+    `;
+  });
+
+}
+
+/* =========================
+   📊 RESULT SYSTEM (PREMIUM)
+========================= */
+function loadResults(){
+
+  resultContainer.innerHTML = "";
+
+  for(let i=0;i<=12;i++){
+
+    let html = `
+    <div class="class-result">
+
+      <div class="class-header" onclick="toggleClass(${i})">
+        <h3>Class ${i}</h3>
+        <span id="arrow-${i}">▼</span>
+      </div>
+
+      <div class="class-body" id="class-body-${i}">
+
+        <div class="term-title t1">📘 First Terminal</div>
+        <div class="scroll-row selectable" onclick="selectResult('${i}-t1')" id="${i}-t1"></div>
+
+        <div class="term-title t2">📗 Second Terminal</div>
+        <div class="scroll-row selectable" onclick="selectResult('${i}-t2')" id="${i}-t2"></div>
+
+        <div class="term-title t3">📕 Third Terminal</div>
+        <div class="scroll-row selectable" onclick="selectResult('${i}-t3')" id="${i}-t3"></div>
+
+      </div>
+
+    </div>
+    `;
+
+    resultContainer.innerHTML += html;
+
+    ["t1","t2","t3"].forEach(term=>{
+
+      const key = `${i}-${term}`;
+      const el = document.getElementById(key);
+
+      /* EMPTY STATE */
+      if(!resultData[key] || resultData[key].length === 0){
+        el.innerHTML = `<div class="empty">No photos yet</div>`;
+      }
+
+      /* LOAD IMAGES */
+      (resultData[key] || []).forEach((img,index)=>{
+        el.innerHTML += `
+        <div class="img-wrap">
+          <img src="${img}" onclick="event.stopPropagation();viewImage(this.src)">
+          <span class="delete-icon"
+          onclick="event.stopPropagation();removePhoto('${key}',${index})">✖</span>
+        </div>
+        `;
+      });
+
+    });
+
+  }
+}
+
+/* =========================
+   🔽 COLLAPSE SYSTEM
+========================= */
+function toggleClass(i){
+
+  const body = document.getElementById(`class-body-${i}`);
+  const arrow = document.getElementById(`arrow-${i}`);
+
+  if(body.style.display === "none"){
+    body.style.display = "block";
+    arrow.innerHTML = "▼";
+  }else{
+    body.style.display = "none";
+    arrow.innerHTML = "▶";
+  }
+}
+
+/* =========================
+   🔍 FULLSCREEN VIEW
+========================= */
+function viewImage(src){
+  viewer.style.display = "flex";
+  viewer.innerHTML = `<img src="${src}">`;
+}
+
+viewer.onclick = ()=>{
+  viewer.style.display = "none";
+};
+
+/* =========================
+   💾 SAVE SYSTEM
+========================= */
+function saveData(){
+  localStorage.setItem("data", JSON.stringify(data));
+  loadAll();
+}
+
+function saveResultData(){
+  localStorage.setItem("resultData", JSON.stringify(resultData));
+  loadResults();
+}
+
+/* =========================
+   📚 CLASS GRID GENERATION
+========================= */
+for(let i=0;i<=12;i++){
+  classesGrid.innerHTML += `
+  <div class="class-box selectable"
+  id="class-${i}"
+  onclick="selectBox('class-${i}')">
+  Class ${i}
+  </div>`;
+}
+
+/* =========================
+   📅 CALENDAR GENERATION
+========================= */
+[
+"Jan","Feb","Mar","Apr","May","Jun",
+"Jul","Aug","Sep","Oct","Nov","Dec"
+].forEach(m=>{
+  months.innerHTML += `
+  <div class="month selectable"
+  id="month-${m}"
+  onclick="selectBox('month-${m}')">
+  ${m}
+  </div>`;
+});
+
+/* =========================
+   🚀 INITIAL LOAD
+========================= */
+loadAll();
+loadResults();
+
+</script>
+
+</body>
+</html>
+```

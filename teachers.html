@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Management</title>
+
+<!-- COMMON CSS -->
+<link rel="stylesheet" href="style.css">
+
+<!-- QR LIBRARY (FIXED) -->
+<style>
+  /* =========================
+   GLOBAL RESET
+========================= */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:Segoe UI, sans-serif;
+  display:flex;
+  background:linear-gradient(135deg,#eef2f7,#dfe7f3);
+  min-height:100vh;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar{
+  width:160px;
+  background:linear-gradient(180deg,#0b3d91,#145ed0);
+  color:white;
+  height:100vh;
+  padding:12px;
+  position:fixed;
+  top:0;
+  left:0;
+  box-shadow:4px 0 15px rgba(0,0,0,0.2);
+  z-index:5;
+}
+
+.sidebar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.add-btn{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:white;
+  color:#0b3d91;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-weight:bold;
+  transition:0.3s;
+}
+.add-btn:hover{
+  transform:rotate(90deg) scale(1.1);
+}
+
+/* NAV ITEMS */
+.nav-item{
+  padding:8px;
+  font-size:12px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-bottom:6px;
+  transition:0.25s;
+}
+
+.nav-item:hover{
+  background:#ffffff33;
+  transform:translateX(5px);
+}
+
+.nav-item.active{
+  background:white;
+  color:#0b3d91;
+  font-weight:bold;
+}
+
+/* =========================
+   MAIN LAYOUT
+========================= */
+.main{
+  margin-left:170px;
+  margin-right:270px;
+  width:100%;
+}
+
+/* =========================
+   HEADER
+========================= */
+.header{
+  background:rgba(255,255,255,0.9);
+  backdrop-filter:blur(10px);
+  padding:10px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  box-shadow:0 2px 10px rgba(0,0,0,0.1);
+  position:sticky;
+  top:0;
+  z-index:4;
+}
+
+/* SEARCH */
+.search-box{
+  flex:1;
+  padding:9px 12px;
+  border-radius:20px;
+  border:1px solid #ccc;
+  outline:none;
+}
+
+.search-box:focus{
+  border-color:#0b3d91;
+  box-shadow:0 0 6px rgba(11,61,145,0.4);
+}
+
+/* SELECT (SORT) */
+select{
+  padding:7px 10px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+/* BUTTONS */
+button{
+  padding:7px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  background:#0b3d91;
+  color:white;
+  transition:0.25s;
+}
+
+button:hover{
+  background:#145ed0;
+  transform:scale(1.05);
+}
+
+.delete-btn{
+  background:#dc2626;
+}
+.delete-btn:hover{
+  background:#b91c1c;
+}
+
+/* =========================
+   GRID CONTENT
+========================= */
+.content{
+  padding:15px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:18px;
+}
+
+/* =========================
+   CARD SYSTEM
+========================= */
+.card{
+  perspective:1000px;
+  height:340px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-8px) scale(1.04);
+}
+
+.card.selected{
+  outline:3px solid #16a34a;
+}
+
+.card-inner{
+  position:relative;
+  width:100%;
+  height:100%;
+  transform-style:preserve-3d;
+  transition:0.7s;
+}
+
+.card.flipped .card-inner{
+  transform:rotateY(180deg);
+}
+
+/* =========================
+   FRONT SIDE (ID STYLE)
+========================= */
+.card-front{
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:14px;
+  overflow:hidden;
+  background:white;
+  backface-visibility:hidden;
+}
+
+/* CURVES */
+.curve-top{
+  position:absolute;
+  width:150%;
+  height:120px;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  top:-60px;
+  left:-20%;
+  border-radius:50%;
+}
+
+.curve-bottom{
+  position:absolute;
+  width:150%;
+  height:100px;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  bottom:-50px;
+  left:-20%;
+  border-radius:50%;
+}
+
+/* HEADER TEXT */
+.school-header{
+  position:absolute;
+  top:10px;
+  width:100%;
+  text-align:center;
+  color:white;
+  z-index:2;
+}
+
+.school-header h4{font-size:13px;}
+.school-header span{font-size:10px;}
+
+/* PHOTO */
+.photo-area{
+  margin-top:60px;
+  display:flex;
+  justify-content:center;
+}
+
+.photo-area img{
+  width:85px;
+  height:85px;
+  border-radius:10px;
+  border:4px solid white;
+  object-fit:cover;
+  box-shadow:0 5px 12px rgba(0,0,0,0.2);
+}
+
+/* DETAILS */
+.details-area{
+  text-align:center;
+  padding:10px;
+}
+
+.details-area h3{
+  font-size:14px;
+  color:#0b3d91;
+}
+
+.details-area p{
+  font-size:11px;
+  color:gray;
+}
+
+.info{
+  margin-top:6px;
+  text-align:left;
+  font-size:11px;
+  padding:0 10px;
+}
+
+/* =========================
+   BACK SIDE
+========================= */
+.card-back{
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:14px;
+  backface-visibility:hidden;
+  transform:rotateY(180deg);
+  background:white;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.back-header{
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  color:white;
+  text-align:center;
+  padding:8px;
+  border-radius:10px;
+  font-size:12px;
+}
+
+.rules{
+  font-size:11px;
+}
+
+.rules ul{
+  padding-left:15px;
+}
+
+.bottom-section{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.qr-box{
+  background:#f4f6f9;
+  padding:5px;
+  border-radius:8px;
+}
+
+.validity{
+  font-size:10px;
+}
+
+.sign-area{
+  text-align:center;
+  font-size:10px;
+}
+
+.sign-area .line{
+  height:2px;
+  background:#0b3d91;
+  width:70%;
+  margin:8px auto;
+}
+
+/* =========================
+   DETAILS PANEL
+========================= */
+#detailsPanel{
+  width:260px;
+  background:white;
+  position:fixed;
+  right:0;
+  top:0;
+  height:100vh;
+  padding:15px;
+  border-left:1px solid #ccc;
+  transform:translateX(100%);
+  transition:0.3s;
+  z-index:6;
+  overflow:auto;
+}
+
+#detailsPanel.show{
+  transform:translateX(0);
+}
+
+/* =========================
+   MODAL
+========================= */
+.modal{
+  display:none;
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  justify-content:center;
+  align-items:center;
+  z-index:10;
+}
+
+.modal-box{
+  background:white;
+  padding:20px;
+  border-radius:14px;
+  width:340px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  animation:pop 0.3s ease;
+}
+
+/* FORM */
+.form-group{
+  display:flex;
+  flex-direction:column;
+  margin-bottom:10px;
+}
+
+.form-group label{
+  font-size:12px;
+  margin-bottom:3px;
+  color:#444;
+}
+
+.modal-box input,
+.modal-box select{
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+/* BUTTONS */
+.modal-actions{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.save-btn{
+  flex:1;
+  background:#16a34a;
+  color:white;
+}
+
+.cancel-btn{
+  flex:1;
+  background:#dc2626;
+  color:white;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+@keyframes pop{
+  from{transform:scale(0.8);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+.empty{
+  text-align:center;
+  color:gray;
+  font-size:14px;
+  margin-top:20px;
+}
+
+/* =========================
+   PRINT MODE
+========================= */
+@media print{
+  body{background:white;}
+
+  .sidebar,
+  .header,
+  #detailsPanel,
+  .modal{
+    display:none !important;
+  }
+
+  .content{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10mm;
+    justify-content:center;
+  }
+
+  .card{
+    width:85.6mm;
+    height:54mm;
+    transform:none !important;
+  }
+
+  .card-inner{
+    transform:none !important;
+  }
+}
+</style>
+</head>
+
+<body data-page="teachers">
+
+<!-- ================= SIDEBAR ================= -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h3>Subjects</h3>
+    <div class="add-btn" onclick="openModal()">+</div>
+  </div>
+
+  <div class="nav-item" onclick="filterData('Math',this)">Math</div>
+  <div class="nav-item" onclick="filterData('Science',this)">Science</div>
+  <div class="nav-item" onclick="filterData('English',this)">English</div>
+  <div class="nav-item" onclick="filterData('Social',this)">Social</div>
+  <div class="nav-item" onclick="filterData('Computer',this)">Computer</div>
+</div>
+
+<!-- ================= MAIN ================= -->
+<div class="main">
+
+  <!-- HEADER -->
+  <div class="header">
+    <input id="search" class="search-box" placeholder="Search teacher..." oninput="searchData()">
+
+    <!-- SORT ADDED -->
+    <select id="sortOptions" onchange="sortData()">
+      <option value="">Sort By</option>
+      <option value="name">Name</option>
+      <option value="subject">Subject</option>
+      <option value="phone">Phone</option>
+    </select>
+
+    <button onclick="editItem()">Edit</button>
+    <button class="delete-btn" onclick="deleteItem()">Delete</button>
+  </div>
+
+  <!-- GRID -->
+  <div id="results" class="content"></div>
+
+</div>
+
+<!-- ================= DETAILS PANEL ================= -->
+<div id="detailsPanel">
+
+  <h3>Teacher ID Card</h3>
+
+  <div id="detailsContent">
+
+    <!-- FRONT -->
+    <div class="card-front" style="position:relative;height:300px;margin-bottom:10px;">
+
+      <div class="curve-top"></div>
+
+      <div class="school-header">
+        <h4>Teacher Card</h4>
+        <span id="detailSubject"></span>
+      </div>
+
+      <div class="photo-area">
+        <img id="detailPhoto" src="">
+      </div>
+
+      <div class="details-area">
+        <h3 id="detailName"></h3>
+        <p id="detailPost"></p>
+      </div>
+
+      <div class="info">
+        <p><b>ID:</b> <span id="detailId"></span></p>
+        <p><b>Phone:</b> <span id="detailPhone"></span></p>
+      </div>
+
+      <div class="curve-bottom"></div>
+    </div>
+
+    <!-- BACK -->
+    <div class="card-back" style="position:relative;height:220px;">
+
+      <div class="back-header">Teacher Info</div>
+
+      <div class="rules">
+        <ul>
+          <li>This card is school property</li>
+          <li>Carry at all times</li>
+          <li>Return if found</li>
+        </ul>
+      </div>
+
+      <div class="bottom-section">
+        <div class="qr-box" id="detailQR"></div>
+        <div class="validity">Valid: 2026</div>
+      </div>
+
+      <div class="sign-area">
+        <div class="line"></div>
+        Authorized Signature
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= MODAL ================= -->
+<div id="modal" class="modal">
+  <div class="modal-box">
+
+    <h3 style="text-align:center;margin-bottom:10px;">👩‍🏫 Teacher Form</h3>
+
+    <div class="form-group">
+      <label>Name</label>
+      <input id="name" placeholder="Enter name">
+    </div>
+
+    <div class="form-group">
+      <label>Post</label>
+      <input id="post" placeholder="e.g. Senior Teacher">
+    </div>
+
+    <div class="form-group">
+      <label>Subject</label>
+      <select id="subject">
+        <option>Math</option>
+        <option>Science</option>
+        <option>English</option>
+        <option>Social</option>
+        <option>Computer</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Phone</label>
+      <input id="phone" placeholder="98XXXXXXXX">
+    </div>
+
+    <div class="form-group">
+      <label>Photo</label>
+      <input type="file" id="photo" accept="image/*">
+    </div>
+
+    <div class="form-group">
+      <label>Admin Password</label>
+      <input type="password" id="password" placeholder="Enter password">
+    </div>
+
+    <div class="modal-actions">
+      <button class="save-btn" onclick="saveData()">💾 Save</button>
+      <button class="cancel-btn" onclick="closeModal()">❌ Cancel</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= JS ================= -->
+<script >
+  /* =========================
+   CONFIG
+========================= */
+const ADMIN_PASS = "Manish.13";
+
+/* Detect page type */
+const PAGE = document.body.dataset.page; // "students" or "teachers"
+
+/* Storage key */
+const STORAGE_KEY = PAGE;
+
+/* =========================
+   DATA
+========================= */
+let dataList = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+let currentList = [...dataList];
+let selectedIndex = null;
+let editMode = false;
+
+/* =========================
+   ELEMENTS
+========================= */
+const results = document.getElementById("results");
+const modal = document.getElementById("modal");
+const searchInput = document.getElementById("search");
+const detailsPanel = document.getElementById("detailsPanel");
+
+/* =========================
+   UTIL
+========================= */
+function saveStorage(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(dataList));
+}
+
+function fileToBase64(file){
+  return new Promise(res=>{
+    const reader = new FileReader();
+    reader.onload = ()=>res(reader.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+function generateId(index){
+  return (PAGE === "teachers" ? "T-" : "S-") +
+    (index+1).toString().padStart(4,"0");
+}
+
+/* =========================
+   MODAL
+========================= */
+function openModal(){
+  modal.style.display = "flex";
+  editMode = false;
+  resetForm();
+}
+
+function closeModal(){
+  modal.style.display = "none";
+}
+
+/* =========================
+   FORM RESET
+========================= */
+function resetForm(){
+  document.querySelectorAll(".modal input, .modal select")
+    .forEach(el => el.value = "");
+}
+
+/* =========================
+   SAVE (COMMON)
+========================= */
+async function saveData(){
+
+  const password = document.getElementById("password")?.value;
+
+  if(password !== ADMIN_PASS){
+    alert("Wrong password");
+    return;
+  }
+
+  let obj = {};
+
+  if(PAGE === "students"){
+    obj = {
+      name: val("studentName"),
+      emis: val("emis"),
+      grade: parseInt(val("grade")),
+      father: val("father"),
+      mother: val("mother"),
+      photo: await getPhoto()
+    };
+
+    if(!obj.name || isNaN(obj.grade)){
+      alert("Fill required fields");
+      return;
+    }
+  }
+
+  if(PAGE === "teachers"){
+    obj = {
+      name: val("name"),
+      post: val("post"),
+      subject: val("subject"),
+      phone: val("phone"),
+      photo: await getPhoto()
+    };
+
+    if(!obj.name){
+      alert("Name required");
+      return;
+    }
+  }
+
+  /* EDIT FIX */
+  if(editMode){
+    dataList[selectedIndex] = obj;
+  }else{
+    dataList.push(obj);
+  }
+
+  saveStorage();
+  closeModal();
+  render(dataList);
+}
+
+/* =========================
+   HELPERS
+========================= */
+function val(id){
+  return document.getElementById(id)?.value.trim() || "";
+}
+
+async function getPhoto(){
+  const fileInput = document.getElementById("photo");
+  if(fileInput?.files[0]){
+    return await fileToBase64(fileInput.files[0]);
+  }
+
+  if(editMode && dataList[selectedIndex]){
+    return dataList[selectedIndex].photo;
+  }
+
+  return "";
+}
+
+/* =========================
+   SELECT
+========================= */
+function selectItem(i){
+
+  const item = currentList[i];
+  selectedIndex = dataList.indexOf(item);
+
+  detailsPanel.classList.add("show");
+
+  if(PAGE === "students"){
+    detailsContent.innerHTML = `
+      <p><b>Name:</b> ${item.name}</p>
+      <p><b>EMIS:</b> ${item.emis}</p>
+      <p><b>Grade:</b> ${item.grade}</p>
+      <p><b>Father:</b> ${item.father}</p>
+      <p><b>Mother:</b> ${item.mother}</p>
+    `;
+  }
+
+  if(PAGE === "teachers"){
+    detailPhoto.src = item.photo || "";
+    detailName.innerText = item.name;
+    detailPost.innerText = item.post || "-";
+    detailSubject.innerText = item.subject;
+    detailPhone.innerText = item.phone || "-";
+    detailId.innerText = generateId(selectedIndex);
+
+    generateQR("detailQR", item);
+  }
+
+  highlightSelected();
+}
+
+function closeDetails(){
+  detailsPanel.classList.remove("show");
+}
+
+/* =========================
+   DELETE
+========================= */
+function deleteItem(){
+  if(selectedIndex === null){
+    alert("Select item");
+    return;
+  }
+
+  if(prompt("Password") !== ADMIN_PASS){
+    alert("Wrong password");
+    return;
+  }
+
+  dataList.splice(selectedIndex,1);
+  saveStorage();
+
+  selectedIndex = null;
+  render(dataList);
+  closeDetails();
+}
+
+/* =========================
+   EDIT
+========================= */
+function editItem(){
+
+  if(selectedIndex === null){
+    alert("Select item");
+    return;
+  }
+
+  const item = dataList[selectedIndex];
+
+  if(PAGE === "students"){
+    setVal("studentName", item.name);
+    setVal("emis", item.emis);
+    setVal("grade", item.grade);
+    setVal("father", item.father);
+    setVal("mother", item.mother);
+  }
+
+  if(PAGE === "teachers"){
+    setVal("name", item.name);
+    setVal("post", item.post);
+    setVal("subject", item.subject);
+    setVal("phone", item.phone);
+  }
+
+  openModal();
+  editMode = true;
+}
+
+function setVal(id,value){
+  const el = document.getElementById(id);
+  if(el) el.value = value;
+}
+
+/* =========================
+   SEARCH
+========================= */
+function searchData(){
+  const q = searchInput.value.toLowerCase();
+
+  currentList = dataList.filter(item=>{
+    return Object.values(item).some(v =>
+      v && v.toString().toLowerCase().includes(q)
+    );
+  });
+
+  render(currentList);
+}
+
+/* =========================
+   FILTER
+========================= */
+function filterData(value, el){
+
+  document.querySelectorAll(".nav-item")
+    .forEach(e=>e.classList.remove("active"));
+
+  el.classList.add("active");
+
+  if(PAGE === "students"){
+    currentList = dataList.filter(s => s.grade == value);
+  }
+
+  if(PAGE === "teachers"){
+    currentList = dataList.filter(t => t.subject === value);
+  }
+
+  render(currentList);
+}
+
+/* =========================
+   SORT
+========================= */
+function sortData(){
+
+  const key = document.getElementById("sortOptions")?.value;
+
+  if(!key){
+    render(dataList);
+    return;
+  }
+
+  currentList.sort((a,b)=>{
+    return (a[key]||"").toString()
+      .localeCompare((b[key]||"").toString());
+  });
+
+  render(currentList);
+}
+
+/* =========================
+   QR GENERATOR
+========================= */
+function generateQR(id, data){
+  const el = document.getElementById(id);
+  if(!el || typeof QRCode === "undefined") return;
+
+  el.innerHTML = "";
+
+  new QRCode(el,{
+    text: JSON.stringify(data),
+    width:80,
+    height:80
+  });
+}
+
+/* =========================
+   CARD FLIP
+========================= */
+function flipCard(e,card){
+  e.stopPropagation();
+  card.classList.toggle("flipped");
+}
+
+/* =========================
+   RENDER
+========================= */
+function render(list){
+
+  currentList = [...list];
+
+  if(list.length === 0){
+    results.innerHTML = `<div class="empty">No data found</div>`;
+    return;
+  }
+
+  results.innerHTML = list.map((item,i)=>{
+
+    const id = generateId(dataList.indexOf(item));
+
+    if(PAGE === "students"){
+      return `
+      <div class="card"
+           onclick="selectItem(${i})"
+           ondblclick="flipCard(event,this)">
+        <div class="card-inner">
+
+          <div class="card-front">
+            <div class="curve-top"></div>
+
+            <div class="school-header">
+              <h4>Student Card</h4>
+              <span>${item.grade}</span>
+            </div>
+
+            <div class="photo-area">
+              <img src="${item.photo || 'https://via.placeholder.com/100'}">
+            </div>
+
+            <div class="details-area">
+              <h3>${item.name}</h3>
+              <p>EMIS: ${item.emis}</p>
+            </div>
+
+            <div class="info">
+              <p><b>ID:</b> ${id}</p>
+            </div>
+
+            <div class="curve-bottom"></div>
+          </div>
+
+          <div class="card-back">
+            <div class="back-header">Student Info</div>
+            <div class="rules">
+              <ul>
+                <li>Carry card daily</li>
+                <li>Keep safe</li>
+              </ul>
+            </div>
+            <div class="bottom-section">
+              <div class="qr-box" id="qr-${i}"></div>
+              <div class="validity">Valid</div>
+            </div>
+          </div>
+
+        </div>
+      </div>`;
+    }
+
+    if(PAGE === "teachers"){
+      return `
+      <div class="card"
+           onclick="selectItem(${i})"
+           ondblclick="flipCard(event,this)">
+        <div class="card-inner">
+
+          <div class="card-front">
+            <div class="curve-top"></div>
+
+            <div class="school-header">
+              <h4>Teacher Card</h4>
+              <span>${item.subject}</span>
+            </div>
+
+            <div class="photo-area">
+              <img src="${item.photo || 'https://via.placeholder.com/100'}">
+            </div>
+
+            <div class="details-area">
+              <h3>${item.name}</h3>
+              <p>${item.post || ''}</p>
+            </div>
+
+            <div class="info">
+              <p><b>ID:</b> ${id}</p>
+              <p>${item.phone || '-'}</p>
+            </div>
+
+            <div class="curve-bottom"></div>
+          </div>
+
+          <div class="card-back">
+            <div class="back-header">Teacher Info</div>
+            <div class="rules">
+              <ul>
+                <li>School property</li>
+                <li>Return if found</li>
+              </ul>
+            </div>
+            <div class="bottom-section">
+              <div class="qr-box" id="qr-${i}"></div>
+              <div class="validity">2026</div>
+            </div>
+          </div>
+
+        </div>
+      </div>`;
+    }
+
+  }).join("");
+
+  /* Generate QR */
+  setTimeout(()=>{
+    list.forEach((item,i)=>{
+      generateQR(`qr-${i}`, item);
+    });
+  },0);
+
+  highlightSelected();
+}
+
+/* =========================
+   HIGHLIGHT
+========================= */
+function highlightSelected(){
+  document.querySelectorAll(".card").forEach((card,i)=>{
+    const real = currentList[i];
+    if(dataList.indexOf(real) === selectedIndex){
+      card.classList.add("selected");
+    }else{
+      card.classList.remove("selected");
+    }
+  });
+}
+
+/* =========================
+   INIT
+========================= */
+render(dataList);
+</script>
+
+</body>
+</html>
